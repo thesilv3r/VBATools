@@ -1,0 +1,39 @@
+'''---
+' Opens a specified window then iterates through a list of keyboard instructions to be executed in specified window
+
+Option Explicit
+ 
+Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" _
+(ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
+Private Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" _
+(ByVal HWnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
+Declare Function SetForegroundWindow Lib "user32" (ByVal HWnd As Long) As Long
+
+Dim lngHwnd As Long                 'hwnd reference
+Dim lngPlaceholder As Long          'length of window text / placeholder variable for triggering output of GetWindowText into strWindowName
+Dim blnWindow As Boolean            'check if the iterations have found the window you're after
+Dim strWindowName As String         'name of window returned by GetWindowText function
+Dim lngLoopTest As Long             'starting point of looping through hwnd values to make sure you don't get stuck in an infinite loop
+Dim lngLoopCount As Long            'count of loops for diagnositics
+
+blnWindow = False
+lngHwnd = FindWindowEx(0, 0, vbNullString, vbNullString)
+lngLoopTest = lngHwnd
+lngLoopCount = 0
+
+Do
+    lngLoopCount = lngLoopCount + 1
+    strWindowName = String$(100, Chr$(0))                       'Set a placeholder value for the window name ready to be overwritten
+    lngPlaceholder = GetWindowText(lngHwnd, strWindowName, 100)
+    If InStr(1, strWindowName, inWindowDescription) > 0 _
+        And InStr(1, strWindowName, notInWindowDescription) = 0 Then
+        blnWindow = True
+    End If
+    If blnWindow = True Or (lngHwnd = lngLoopTest And lngLoopCount > 1) Then: Exit Do
+    lngHwnd = FindWindowEx(0, lngHwnd, vbNullString, vbNullString)
+Loop
+If blnWindow = False Then: lngHwnd = 0
+
+get_window_hwnd = lngHwnd
+
+End Function
